@@ -1,0 +1,48 @@
+---
+- name: Déploiement de l'application web
+  hosts: localhost
+  connection: local
+  become: false
+  
+  vars:
+    app_name: "jenkins-cicd-app"
+    deploy_path: "/tmp/deploy-jenkins-app"
+    source_path: "{{ playbook_dir }}"
+  
+  tasks:
+    - name: Afficher le début du déploiement
+      debug:
+        msg: "🚀 Début du déploiement de {{ app_name }}"
+    
+    - name: Créer le répertoire de déploiement
+      file:
+        path: "{{ deploy_path }}"
+        state: directory
+        mode: '0755'
+    
+    - name: Déployer index.html
+      copy:
+        src: "{{ source_path }}/index.html"
+        dest: "{{ deploy_path }}/index.html"
+        mode: '0644'
+    
+    - name: Déployer style.css
+      copy:
+        src: "{{ source_path }}/style.css"
+        dest: "{{ deploy_path }}/style.css"
+        mode: '0644'
+    
+    - name: Vérifier les fichiers déployés
+      find:
+        paths: "{{ deploy_path }}"
+        patterns: "*.html,*.css"
+      register: deployed_files
+    
+    - name: Afficher les fichiers déployés
+      debug:
+        msg: "✅ Fichier déployé : {{ item.path }}"
+      loop: "{{ deployed_files.files }}"
+    
+    - name: Confirmer le déploiement
+      debug:
+        msg: "✅ Déploiement terminé avec succès dans {{ deploy_path }}"

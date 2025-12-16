@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        PROJECT_NAME = 'Pipeline CI/CD Jenkins'
+        PROJECT_NAME = 'Pipeline CI/CD Jenkins & Ansible'
         DEPLOY_PATH = '/tmp/deploy-jenkins-app'
     }
     
@@ -10,7 +10,7 @@ pipeline {
         stage('🔔 Préparation') {
             steps {
                 echo '========================================='
-                echo '🚀 Début du Pipeline CI/CD'
+                echo '🚀 Début du Pipeline CI/CD avec Ansible'
                 echo "📦 Projet : ${env.PROJECT_NAME}"
                 echo "🕐 Date : ${new Date()}"
                 echo '========================================='
@@ -33,28 +33,32 @@ pipeline {
                     ls -la
                     
                     echo ""
-                    echo "Fichiers HTML et CSS détectés :"
-                    du -h index.html style.css
+                    echo "Fichiers détectés :"
+                    du -h index.html style.css deploy.yml
                 '''
                 echo '✅ Build terminé avec succès !'
             }
         }
         
-        stage('🚀 Déploiement') {
+        stage('🔍 Vérification Ansible') {
             steps {
-                echo '🚀 Déploiement de l\'application...'
-                sh """
-                    # Création du répertoire de déploiement
-                    mkdir -p ${env.DEPLOY_PATH}
-                    
-                    # Copie des fichiers
-                    cp index.html ${env.DEPLOY_PATH}/
-                    cp style.css ${env.DEPLOY_PATH}/
-                    
-                    echo "Fichiers déployés dans : ${env.DEPLOY_PATH}"
-                    ls -la ${env.DEPLOY_PATH}
-                """
-                echo '✅ Déploiement réussi !'
+                echo '🔍 Vérification de l\'installation Ansible...'
+                sh '''
+                    ansible --version
+                    echo ""
+                    echo "✅ Ansible est installé et fonctionnel"
+                '''
+            }
+        }
+        
+        stage('🚀 Déploiement avec Ansible') {
+            steps {
+                echo '🚀 Déploiement de l\'application avec Ansible...'
+                sh '''
+                    echo "Exécution du playbook Ansible..."
+                    ansible-playbook deploy.yml -v
+                '''
+                echo '✅ Déploiement Ansible terminé !'
             }
         }
         
@@ -65,6 +69,9 @@ pipeline {
                     if [ -f "${env.DEPLOY_PATH}/index.html" ]; then
                         echo "✅ Application correctement déployée"
                         echo "📍 Chemin : ${env.DEPLOY_PATH}"
+                        echo ""
+                        echo "Fichiers déployés :"
+                        ls -lh ${env.DEPLOY_PATH}
                     else
                         echo "❌ Erreur de déploiement"
                         exit 1
@@ -78,7 +85,8 @@ pipeline {
         success {
             echo '========================================='
             echo '✅ PIPELINE TERMINÉ AVEC SUCCÈS !'
-            echo "📦 Application déployée : ${env.DEPLOY_PATH}"
+            echo "📦 Application déployée avec Ansible"
+            echo "📍 Chemin : ${env.DEPLOY_PATH}"
             echo '========================================='
         }
         failure {
