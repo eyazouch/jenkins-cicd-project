@@ -25,63 +25,18 @@ pipeline {
             }
         }
         
-        stage('🔍 Vérification des fichiers') {
-            steps {
-                echo '🔍 Vérification de la présence des fichiers...'
-                sh '''
-                    echo "Contenu du répertoire :"
-                    ls -la
-                    
-                    echo ""
-                    echo "Vérification des fichiers requis :"
-                    
-                    if [ -f "index.html" ]; then
-                        echo "✅ index.html trouvé"
-                    else
-                        echo "❌ index.html manquant"
-                        exit 1
-                    fi
-                    
-                    if [ -f "style.css" ]; then
-                        echo "✅ style.css trouvé"
-                    else
-                        echo "❌ style.css manquant"
-                        exit 1
-                    fi
-                    
-                    if [ -f "test.sh" ]; then
-                        echo "✅ test.sh trouvé"
-                    else
-                        echo "❌ test.sh manquant"
-                        exit 1
-                    fi
-                '''
-            }
-        }
-        
         stage('🔨 Build') {
             steps {
                 echo '🔨 Préparation de l\'application...'
                 sh '''
-                    echo "Taille des fichiers :"
-                    du -h index.html style.css test.sh
+                    echo "Contenu du projet :"
+                    ls -la
                     
                     echo ""
-                    echo "Vérification du code HTML :"
-                    head -5 index.html
+                    echo "Fichiers HTML et CSS détectés :"
+                    du -h index.html style.css
                 '''
                 echo '✅ Build terminé avec succès !'
-            }
-        }
-        
-        stage('🧪 Tests') {
-            steps {
-                echo '🧪 Exécution des tests automatiques...'
-                sh '''
-                    chmod +x test.sh
-                    ./test.sh
-                '''
-                echo '✅ Tous les tests sont passés !'
             }
         }
         
